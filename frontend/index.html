@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCC Documentation-Gap Detection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/style.css">
+    <!-- Phosphor Icons for premium icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="ph-fill ph-heartbeat"></i>
+                <h2>HCC GapSystem</h2>
+            </div>
+            <nav>
+                <a href="#" class="active" id="nav-dashboard" onclick="switchTab('dashboard')"><i class="ph ph-squares-four"></i> Dashboard</a>
+                <a href="#" id="nav-patients" onclick="switchTab('patients')"><i class="ph ph-users"></i> Patients</a>
+                <a href="#" onclick="document.getElementById('upload-modal').classList.add('active')"><i class="ph ph-upload-simple"></i> Upload Data</a>
+                <a href="#" onclick="document.getElementById('settings-modal').classList.add('active')"><i class="ph ph-gear"></i> Settings</a>
+                <a href="#" onclick="logout()" style="margin-top: auto; color: var(--danger-color);"><i class="ph ph-sign-out"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="header-titles">
+                    <h1>Overview Dashboard</h1>
+                    <p>Medicare Advantage Risk Adjustment Analysis & Documentation Intelligence</p>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view-section active">
+                <!-- Stats Grid -->
+                <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ph ph-users"></i></div>
+                    <div class="stat-details">
+                        <p class="stat-title">Total Patients</p>
+                        <h3 class="stat-value" id="stat-total">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ph ph-file-search"></i></div>
+                    <div class="stat-details">
+                        <p class="stat-title">Patients Reviewed</p>
+                        <h3 class="stat-value" id="stat-reviewed">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid var(--primary-color);">
+                    <div class="stat-icon" style="background-color: rgba(67, 24, 255, 0.1); color: var(--primary-color);"><i class="ph ph-files"></i></div>
+                    <div class="stat-details">
+                        <p class="stat-title">Docs Processed</p>
+                        <h3 class="stat-value" id="stat-docs">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon"><i class="ph ph-warning-circle"></i></div>
+                    <div class="stat-details">
+                        <p class="stat-title">Potential Gap</p>
+                        <h3 class="stat-value" id="stat-high-risk">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card" style="border-left: 4px solid #ffab00;">
+                    <div class="stat-icon" style="background-color: rgba(255, 171, 0, 0.1); color: #ffab00;"><i class="ph ph-magnifying-glass"></i></div>
+                    <div class="stat-details">
+                        <p class="stat-title">Review Required</p>
+                        <h3 class="stat-value" id="stat-medium-risk">-</h3>
+                    </div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon"><i class="ph ph-check-circle"></i></div>
+                    <div class="stat-details">
+                        <p class="stat-title">Supported</p>
+                        <h3 class="stat-value" id="stat-low-risk">-</h3>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Charts Grid -->
+            <section class="charts-grid">
+                <div class="chart-card">
+                    <h3>Risk Level Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Patient Processing Pipeline</h3>
+                    <div class="chart-container">
+                        <canvas id="pipelineChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Patients View -->
+        <div id="patients-view" class="view-section">
+            <!-- Patient Table -->
+            <section class="table-section" id="patients-section">
+                <div class="section-header">
+                    <h2>Recent Patient Evaluations</h2>
+                    <div class="filters-container" style="display: flex; gap: 10px;">
+                        <select id="gender-filter" onchange="filterPatients()" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); color: var(--text-primary); font-weight: 500; outline: none; cursor: pointer;">
+                            <option value="All">All Genders</option>
+                            <option value="M">Male (M)</option>
+                            <option value="F">Female (F)</option>
+                        </select>
+                        <select id="risk-filter" onchange="filterPatients()" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); color: var(--text-primary); font-weight: 500; outline: none; cursor: pointer;">
+                            <option value="All">All Risks</option>
+                            <option value="Potential Documentation Gap">Potential Documentation Gap</option>
+                            <option value="Review Required">Review Required</option>
+                            <option value="Supported Documentation">Supported Documentation</option>
+                            <option value="Review Completed">Review Completed</option>
+                        </select>
+                        <div class="search-box" style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); border: 1px solid var(--border-color);">
+                            <i class="ph ph-magnifying-glass"></i>
+                            <input type="text" id="patient-search" placeholder="Search patients..." onkeyup="filterPatients()">
+                        </div>
+                        <button class="btn btn-secondary" onclick="downloadBulkReport()" style="display: flex; align-items: center; gap: 6px;">
+                            <i class="ph ph-download-simple"></i> Download Report
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="patients-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('id')" style="cursor: pointer; transition: color 0.2s;">Patient ID <i class="ph ph-arrows-down-up" style="font-size: 12px; margin-left: 4px;"></i></th>
+                                <th onclick="sortTable('age')" style="cursor: pointer; transition: color 0.2s;">Age <i class="ph ph-arrows-down-up" style="font-size: 12px; margin-left: 4px;"></i></th>
+                                <th onclick="sortTable('gender')" style="cursor: pointer; transition: color 0.2s;">Gender <i class="ph ph-arrows-down-up" style="font-size: 12px; margin-left: 4px;"></i></th>
+                                <th>Prediction</th>
+                                <th onclick="sortTable('probability')" style="cursor: pointer; transition: color 0.2s;">Probability <i class="ph ph-arrows-down-up" style="font-size: 12px; margin-left: 4px;"></i></th>
+                                <th>Risk Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+        </main>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="upload-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Upload Synthea ZIP</h2>
+                <button class="close-btn" onclick="document.getElementById('upload-modal').classList.remove('active')"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="drop-zone">
+                    <i class="ph ph-cloud-arrow-up"></i>
+                    <h3>Drag & Drop your ZIP file here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="file-input" accept=".zip" hidden>
+                </div>
+                <p class="upload-hint">Upload a ZIP containing patients.csv, conditions.csv, etc.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('upload-modal').classList.remove('active')">Cancel</button>
+                <button class="btn btn-primary" id="upload-btn">Process Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explanation Modal -->
+    <div class="modal-overlay" id="explanation-modal">
+        <div class="modal large">
+            <div class="modal-header">
+                <h2>Patient Review: <span id="review-patient-id"></span></h2>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="regenerateExplanation(event)"><i class="ph ph-arrows-clockwise"></i> Regenerate AI</button>
+                    <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="downloadReport()"><i class="ph ph-download-simple"></i> Download</button>
+                    <button class="close-btn" onclick="document.getElementById('explanation-modal').classList.remove('active')"><i class="ph ph-x"></i></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="review-grid">
+                    <div class="review-sidebar">
+                        <div class="detail-group">
+                            <label>Model Prediction</label>
+                            <h3 id="review-prediction" class="prediction-text">...</h3>
+                        </div>
+                        <div class="detail-group">
+                            <label>Probability (Risk Score)</label>
+                            <h3 id="review-probability">...</h3>
+                        </div>
+                        <div class="detail-group">
+                            <label>Doc Completeness</label>
+                            <h3 id="review-completeness" style="color: var(--primary-color);">...</h3>
+                        </div>
+                        <div class="detail-group">
+                            <label>Risk Level</label>
+                            <span class="badge" id="review-risk">...</span>
+                        </div>
+                    </div>
+                    <div class="review-main">
+                        <h3>AI Explanation</h3>
+                        <div class="llm-box" id="review-explanation">
+                            <p><i class="ph ph-spinner ph-spin"></i> Loading explanation from LLM...</p>
+                        </div>
+                        
+                        <div class="records-section">
+                            <h3>Patient Records</h3>
+                            <p style="font-size: 13px; color: var(--text-secondary);">Conditions and Medications found in documents.</p>
+                            <div class="records-list" id="review-records">
+                                <ul>
+                                    <li>Loading...</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btn-mark-review" onclick="markReviewRequired()"><i class="ph ph-flag"></i> Flag for Review</button>
+                <button class="btn btn-success" id="btn-mark-completed" onclick="markReviewCompleted()"><i class="ph ph-check-circle"></i> Mark as Completed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Profile & Settings</h2>
+                <button class="close-btn" onclick="document.getElementById('settings-modal').classList.remove('active')"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body" style="padding-top: 10px;">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding: 15px; background: rgba(67, 24, 255, 0.05); border-radius: 10px;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        <i class="ph ph-user"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">Administrator</h3>
+                        <p id="settings-email" style="margin: 4px 0 0; font-size: 14px; color: var(--text-secondary);">admin@hcc.com</p>
+                    </div>
+                </div>
+                
+                <h4 style="margin-bottom: 10px; color: var(--text-primary);">Account Details</h4>
+                <div style="padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                    <label style="display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Full Name</label>
+                    <input type="text" value="Administrator" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-family: inherit;" readonly>
+                </div>
+                <div style="padding: 12px 0; border-bottom: 1px solid var(--border-color);">
+                    <label style="display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">System Role</label>
+                    <input type="text" value="Super Admin" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); font-family: inherit; background: #f4f7fe;" readonly>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-secondary" style="color: var(--danger-color); border-color: rgba(224, 40, 46, 0.2);" onclick="logout()"><i class="ph ph-sign-out"></i> Logout</button>
+                <button class="btn btn-primary" onclick="document.getElementById('settings-modal').classList.remove('active')">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/app.js"></script>
+</body>
+</html>

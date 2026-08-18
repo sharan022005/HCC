@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pymongo
+pydantic
+python-multipart
+joblib
+pandas
+scikit-learn
+xgboost
+lightgbm
+openai
+python-dotenv
+passlib
+bcrypt<4.0.0
+PyJWT
+python-jose
+reportlab
